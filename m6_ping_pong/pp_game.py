@@ -22,8 +22,8 @@ class GameSprite(sprite.Sprite):
 
 class Player(GameSprite):
     """класс-наследник GameSprite, для создания управляемого персонажа"""
-    def move_left(self):
-        """левая ракета - стрелки вверх/вниз"""
+    def move_right(self):
+        """правая ракета - стрелки вверх/вниз"""
         keys = key.get_pressed()
 
         if keys[K_UP] and self.rect.y > 5:
@@ -31,8 +31,8 @@ class Player(GameSprite):
         if keys[K_DOWN] and self.rect.y < win_height - 70:
             self.rect.y += self.speed
 
-    def move_right(self):
-        """правая ракета - клавиши W/S"""
+    def move_left(self):
+        """левая ракета - клавиши W/S"""
         keys = key.get_pressed()
 
         if keys[K_w] and self.rect.y > 5:
@@ -52,13 +52,20 @@ window.fill(back)
 # персонажи игры - две ракетки и мяч
 racket1 = Player('racket.png', 30, 200, 4, 70, 150)
 racket2 = Player('racket.png', 520, 200, 4, 70, 150)
-ball = Player('tenis_ball.png', 200, 200, 4, 50, 50)
+ball = Player('tenis_ball.png', 200, 200, 4, 30, 30)
 
 # переменные, отвечающие за состояние игры
 game = True
 finish = False
 clock = time.Clock()
 FPS = 60
+
+# надписи
+font.init()
+font = font.Font(None, 35)
+
+lose1 = font.render('ИГРОК 1 ПРОИГРАЛ!', True, 'red')
+lose2 = font.render('ИГРОК 2 ПРОИГРАЛ!', True, 'red')
 
 speed_x = 3
 speed_y = 3
@@ -82,6 +89,20 @@ while game:
         if sprite.collide_rect(racket1, ball) or sprite.collide_rect(racket2, ball):
             speed_x *= -1
             speed_y *= -1
+
+        # если мяч достигает границ экрана, меняем направление его движения
+        if ball.rect.y > win_height-50 or ball.rect.y < 0:
+            speed_y *= -1
+
+        # если мяч улетел влево - проигрыш первого игрока
+        if ball.rect.x < 0:
+            finish = True
+            window.blit(lose1, (200, 200))
+
+        # если мяч улетел вправо - проигрыш второго игрока
+        if ball.rect.x > win_width:
+            finish = True
+            window.blit(lose2, (200, 200))
 
         racket1.reset()
         racket2.reset()
